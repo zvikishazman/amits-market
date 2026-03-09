@@ -1,0 +1,9 @@
+export const DEFAULT_STARTING_BALANCE = 1000;
+export const MIN_STARTING_BALANCE = 100;
+export const MAX_STARTING_BALANCE = 100000;
+export const MIN_BET = 1;
+export const MAX_BET = 500;
+export const CURRENCY_SYMBOL = "₪";
+export const CURRENCY_NAME = "שקלים";
+export const APP_NAME = "Amit's Market";
+export const APP_DESCRIPTION = "Prediction markets for your friend group";
