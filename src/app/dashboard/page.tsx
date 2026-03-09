@@ -3,7 +3,6 @@
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { formatCurrency } from "@/lib/utils";
 import { CURRENCY_SYMBOL } from "@/lib/constants";
 
 interface GroupSummary {
