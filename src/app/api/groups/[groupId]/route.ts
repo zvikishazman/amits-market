@@ -51,8 +51,18 @@ export async function GET(
               _count: {
                 select: { bets: true },
               },
+              bets: {
+                select: { amount: true },
+              },
             },
           },
+        },
+        orderBy: { createdAt: "desc" },
+      },
+      settlements: {
+        include: {
+          fromUser: { select: { id: true, name: true } },
+          toUser: { select: { id: true, name: true } },
         },
         orderBy: { createdAt: "desc" },
       },
@@ -63,5 +73,37 @@ export async function GET(
     return NextResponse.json({ error: "Group not found" }, { status: 404 });
   }
 
-  return NextResponse.json({ group });
+  // Calculate per-member bet stats
+  const allBets = await prisma.bet.findMany({
+    where: {
+      option: {
+        question: { groupId },
+      },
+    },
+    select: {
+      userId: true,
+      amount: true,
+      payout: true,
+    },
+  });
+
+  const memberStats: Record<string, { totalBet: number; totalWon: number; totalLost: number; betCount: number; winCount: number }> = {};
+  for (const bet of allBets) {
+    if (!memberStats[bet.userId]) {
+      memberStats[bet.userId] = { totalBet: 0, totalWon: 0, totalLost: 0, betCount: 0, winCount: 0 };
+    }
+    const s = memberStats[bet.userId];
+    s.betCount++;
+    s.totalBet += bet.amount;
+    if (bet.payout !== null) {
+      if (bet.payout > 0) {
+        s.totalWon += bet.payout - bet.amount;
+        s.winCount++;
+      } else {
+        s.totalLost += bet.amount;
+      }
+    }
+  }
+
+  return NextResponse.json({ group, memberStats });
 }

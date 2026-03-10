@@ -106,3 +106,17 @@ body {
     text-wrap: balance;
   }
 }
+
+/* RTL support */
+[dir="rtl"] .gradient-text {
+  @apply bg-gradient-to-l;
+}
+
+[dir="rtl"] .btn-primary {
+  @apply bg-gradient-to-l;
+}
+
+[dir="rtl"] .font-mono {
+  direction: ltr;
+  unicode-bidi: embed;
+}

@@ -14,12 +14,14 @@ model User {
   emailVerified DateTime?
   image         String?
 
-  accounts         Account[]
-  sessions         Session[]
-  createdGroups    Group[]       @relation("GroupCreator")
-  memberships      Membership[]
-  bets             Bet[]
-  createdQuestions Question[]    @relation("QuestionCreator")
+  accounts            Account[]
+  sessions            Session[]
+  createdGroups       Group[]       @relation("GroupCreator")
+  memberships         Membership[]
+  bets                Bet[]
+  createdQuestions    Question[]    @relation("QuestionCreator")
+  sentSettlements     Settlement[]  @relation("SettlementFrom")
+  receivedSettlements Settlement[]  @relation("SettlementTo")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -69,6 +71,7 @@ model Group {
   creator         User         @relation("GroupCreator", fields: [creatorId], references: [id])
   members         Membership[]
   questions       Question[]
+  settlements     Settlement[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -97,6 +100,8 @@ model Question {
   creatorId        String
   status           String    @default("OPEN")
   resolvedOptionId String?
+  betAmount        Float?
+  showBetChoices   Boolean  @default(false)
 
   group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
   creator User   @relation("QuestionCreator", fields: [creatorId], references: [id])
@@ -128,6 +133,20 @@ model Bet {
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   option Option @relation(fields: [optionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+model Settlement {
+  id         String @id @default(cuid())
+  groupId    String
+  fromUserId String
+  toUserId   String
+  amount     Float
+
+  group    Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  fromUser User  @relation("SettlementFrom", fields: [fromUserId], references: [id])
+  toUser   User  @relation("SettlementTo", fields: [toUserId], references: [id])
 
   createdAt DateTime @default(now())
 }

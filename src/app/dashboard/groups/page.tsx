@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useI18n } from "@/lib/i18n/context";
 
 interface Group {
   id: string;
@@ -14,6 +15,7 @@ interface Group {
 export default function GroupsPage() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useI18n();
 
   useEffect(() => {
     fetch("/api/groups")
@@ -28,9 +30,9 @@ export default function GroupsPage() {
   return (
     <div className="space-y-4 sm:space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl sm:text-2xl font-bold">My Groups</h1>
+        <h1 className="text-xl sm:text-2xl font-bold">{t("myGroups")}</h1>
         <Link href="/dashboard/groups/new" className="btn-primary text-xs sm:text-sm !py-2 !px-3 sm:!px-4">
-          + Create Group
+          + {t("createGroup")}
         </Link>
       </div>
 
@@ -50,9 +52,9 @@ export default function GroupsPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
           </div>
-          <h3 className="text-lg font-semibold mb-2">No groups yet</h3>
-          <p className="text-gray-400 mb-6 text-sm">Create a group and invite friends!</p>
-          <Link href="/dashboard/groups/new" className="btn-primary">Create Group</Link>
+          <h3 className="text-lg font-semibold mb-2">{t("noGroupsYet")}</h3>
+          <p className="text-gray-400 mb-6 text-sm">{t("createAGroupAndInvite")}</p>
+          <Link href="/dashboard/groups/new" className="btn-primary">{t("createGroup")}</Link>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
@@ -64,8 +66,8 @@ export default function GroupsPage() {
             >
               <h3 className="font-semibold text-white text-base sm:text-lg mb-1">{group.name}</h3>
               <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-400">
-                <span>{group._count.members} members</span>
-                <span>{group._count.questions} markets</span>
+                <span>{group._count.members} {t("members")}</span>
+                <span>{group._count.questions} {t("markets")}</span>
               </div>
               <div className="mt-3 flex items-center gap-2">
                 <span className="text-xs font-mono text-gray-500 bg-gray-800/50 px-2 py-1 rounded">

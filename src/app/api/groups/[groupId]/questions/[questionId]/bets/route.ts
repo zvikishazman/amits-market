@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { auth } from "@/../../auth";
 import { prisma } from "@/lib/prisma";
 import { calculateOdds } from "@/lib/odds";
-import { MIN_BET, MAX_BET } from "@/lib/constants";
 
 export async function GET(
   request: Request,
@@ -77,18 +76,11 @@ export async function POST(
   }
 
   const body = await request.json();
-  const { optionId, amount } = body;
+  const { optionId } = body;
 
-  if (!optionId || typeof amount !== "number") {
+  if (!optionId) {
     return NextResponse.json(
-      { error: "optionId and amount are required" },
-      { status: 400 }
-    );
-  }
-
-  if (amount < MIN_BET || amount > MAX_BET) {
-    return NextResponse.json(
-      { error: `Bet amount must be between ${MIN_BET} and ${MAX_BET}` },
+      { error: "optionId is required" },
       { status: 400 }
     );
   }
@@ -99,7 +91,7 @@ export async function POST(
       options: {
         include: {
           bets: {
-            select: { amount: true },
+            select: { amount: true, userId: true },
           },
         },
       },
@@ -120,10 +112,30 @@ export async function POST(
     );
   }
 
+  if (question.closesAt && new Date(question.closesAt) <= new Date()) {
+    return NextResponse.json(
+      { error: "Betting deadline has passed" },
+      { status: 400 }
+    );
+  }
+
   const validOption = question.options.find((o) => o.id === optionId);
   if (!validOption) {
     return NextResponse.json(
       { error: "Invalid option ID" },
+      { status: 400 }
+    );
+  }
+
+  const amount = question.betAmount || 50;
+
+  // Check if user already bet on this question
+  const existingBet = question.options.some((opt) =>
+    opt.bets.some((b) => b.userId === session.user.id)
+  );
+  if (existingBet) {
+    return NextResponse.json(
+      { error: "You already placed a bet on this question" },
       { status: 400 }
     );
   }
@@ -136,7 +148,6 @@ export async function POST(
   }
 
   const result = await prisma.$transaction(async (tx) => {
-    // Deduct balance from membership
     await tx.membership.update({
       where: {
         userId_groupId: {
@@ -149,7 +160,6 @@ export async function POST(
       },
     });
 
-    // Create the bet
     const bet = await tx.bet.create({
       data: {
         amount,
@@ -161,7 +171,6 @@ export async function POST(
     return bet;
   });
 
-  // Recalculate odds after the bet
   const updatedQuestion = await prisma.question.findUnique({
     where: { id: questionId },
     include: {
@@ -178,4 +187,111 @@ export async function POST(
   const odds = updatedQuestion ? calculateOdds(updatedQuestion.options) : null;
 
   return NextResponse.json({ bet: result, odds }, { status: 201 });
+}
+
+// Change bet (move to a different option)
+export async function PUT(
+  request: Request,
+  { params }: { params: { groupId: string; questionId: string } }
+) {
+  const session = await auth();
+  if (!session?.user?.id)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { groupId, questionId } = params;
+
+  const membership = await prisma.membership.findUnique({
+    where: {
+      userId_groupId: {
+        userId: session.user.id,
+        groupId,
+      },
+    },
+  });
+
+  if (!membership) {
+    return NextResponse.json(
+      { error: "You are not a member of this group" },
+      { status: 403 }
+    );
+  }
+
+  const body = await request.json();
+  const { optionId } = body;
+
+  if (!optionId) {
+    return NextResponse.json(
+      { error: "optionId is required" },
+      { status: 400 }
+    );
+  }
+
+  const question = await prisma.question.findUnique({
+    where: { id: questionId, groupId },
+    include: {
+      options: {
+        include: {
+          bets: {
+            select: { id: true, amount: true, userId: true, optionId: true },
+          },
+        },
+      },
+    },
+  });
+
+  if (!question) {
+    return NextResponse.json({ error: "Question not found" }, { status: 404 });
+  }
+
+  if (question.status !== "OPEN") {
+    return NextResponse.json({ error: "Question is not open" }, { status: 400 });
+  }
+
+  if (question.closesAt && new Date(question.closesAt) <= new Date()) {
+    return NextResponse.json({ error: "Betting deadline has passed" }, { status: 400 });
+  }
+
+  const validOption = question.options.find((o) => o.id === optionId);
+  if (!validOption) {
+    return NextResponse.json({ error: "Invalid option ID" }, { status: 400 });
+  }
+
+  // Find user's existing bet
+  let existingBet: { id: string; amount: number; userId: string; optionId: string } | null = null;
+  for (const opt of question.options) {
+    const found = opt.bets.find((b) => b.userId === session.user.id);
+    if (found) {
+      existingBet = found;
+      break;
+    }
+  }
+
+  if (!existingBet) {
+    return NextResponse.json({ error: "You haven't placed a bet yet" }, { status: 400 });
+  }
+
+  if (existingBet.optionId === optionId) {
+    return NextResponse.json({ error: "You already bet on this option" }, { status: 400 });
+  }
+
+  // Move bet to new option (same amount, just change optionId)
+  await prisma.bet.update({
+    where: { id: existingBet.id },
+    data: { optionId },
+  });
+
+  const updatedQuestion = await prisma.question.findUnique({
+    where: { id: questionId },
+    include: {
+      options: {
+        include: {
+          bets: { select: { amount: true } },
+        },
+      },
+    },
+  });
+
+  const odds = updatedQuestion ? calculateOdds(updatedQuestion.options) : null;
+
+  return NextResponse.json({ success: true, odds });
 }

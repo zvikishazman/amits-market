@@ -1,4 +1,5 @@
 import UserMenu from "@/components/auth/UserMenu";
+import LanguageToggle from "@/components/ui/LanguageToggle";
 
 interface TopbarProps {
   onMenuClick?: () => void;
@@ -19,12 +20,12 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
             </svg>
           </button>
         )}
-        {/* Page title slot - can be customized by parent */}
         <div className="hidden sm:block" />
       </div>
 
-      {/* Right: User menu */}
+      {/* Right: Language toggle + User menu */}
       <div className="flex items-center gap-3">
+        <LanguageToggle />
         <UserMenu />
       </div>
     </header>

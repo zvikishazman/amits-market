@@ -1,19 +1,22 @@
+"use client";
+
 import Link from "next/link";
 import Logo from "@/components/layout/Logo";
+import { useI18n } from "@/lib/i18n/context";
 
-interface ErrorPageProps {
-  searchParams: { error?: string };
-}
+export default function AuthErrorPage() {
+  const { t } = useI18n();
 
-const errorMessages: Record<string, string> = {
-  Configuration: "There is a problem with the server configuration.",
-  AccessDenied: "Access denied. You do not have permission to sign in.",
-  Verification: "The verification link has expired or has already been used.",
-  Default: "An unexpected error occurred during authentication.",
-};
+  const params = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+  const errorType = params?.get("error") || "Default";
 
-export default function AuthErrorPage({ searchParams }: ErrorPageProps) {
-  const errorType = searchParams.error || "Default";
+  const errorMessages: Record<string, string> = {
+    Configuration: t("errorConfiguration"),
+    AccessDenied: t("errorAccessDenied"),
+    Verification: t("errorVerification"),
+    Default: t("errorDefault"),
+  };
+
   const errorMessage = errorMessages[errorType] || errorMessages.Default;
 
   return (
@@ -39,7 +42,7 @@ export default function AuthErrorPage({ searchParams }: ErrorPageProps) {
 
           {/* Error message */}
           <h1 className="text-xl font-bold text-white mb-2">
-            Authentication Error
+            {t("authError")}
           </h1>
           <p className="text-gray-400 text-sm mb-8">
             {errorMessage}
@@ -47,7 +50,7 @@ export default function AuthErrorPage({ searchParams }: ErrorPageProps) {
 
           {/* Back to sign in */}
           <Link href="/auth/signin" className="btn-primary inline-block">
-            Try Again
+            {t("tryAgain")}
           </Link>
         </div>
       </div>

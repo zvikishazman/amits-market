@@ -85,7 +85,7 @@ export async function POST(
   }
 
   const body = await request.json();
-  const { title, description, options, closesAt } = body;
+  const { title, description, options, closesAt, betAmount, showBetChoices } = body;
 
   if (!title || typeof title !== "string" || title.trim().length === 0) {
     return NextResponse.json(
@@ -101,13 +101,32 @@ export async function POST(
     );
   }
 
+  if (typeof betAmount !== "number" || betAmount < 1 || betAmount > 10000) {
+    return NextResponse.json(
+      { error: "Bet amount must be between 1 and 10,000" },
+      { status: 400 }
+    );
+  }
+
+  if (closesAt) {
+    const closeDate = new Date(closesAt);
+    if (closeDate <= new Date()) {
+      return NextResponse.json(
+        { error: "Closing date must be in the future" },
+        { status: 400 }
+      );
+    }
+  }
+
   const question = await prisma.question.create({
     data: {
       title: title.trim(),
       description: description?.trim() || null,
       groupId,
       creatorId: session.user.id,
+      betAmount: Math.round(betAmount),
       closesAt: closesAt ? new Date(closesAt) : null,
+      showBetChoices: showBetChoices === true,
       options: {
         create: options.map((text: string) => ({ text: text.trim() })),
       },

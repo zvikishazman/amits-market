@@ -1,10 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
+import { useI18n } from "@/lib/i18n/context";
 
 export default function GoogleSignInButton() {
   const [isLoading, setIsLoading] = useState(false);
+  const { t } = useI18n();
+
+  // Reset loading state when user navigates back (bfcache)
+  useEffect(() => {
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) setIsLoading(false);
+    };
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, []);
 
   const handleClick = async () => {
     setIsLoading(true);
@@ -66,7 +77,7 @@ export default function GoogleSignInButton() {
           />
         </svg>
       )}
-      <span>{isLoading ? "Signing in..." : "Continue with Google"}</span>
+      <span>{isLoading ? t("signingIn") : t("continueWithGoogle")}</span>
     </button>
   );
 }

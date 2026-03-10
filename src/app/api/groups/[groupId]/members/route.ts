@@ -40,3 +40,80 @@ export async function GET(
 
   return NextResponse.json(members);
 }
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: { groupId: string } }
+) {
+  const session = await auth();
+  if (!session?.user?.id)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { groupId } = params;
+
+  const adminMembership = await prisma.membership.findUnique({
+    where: {
+      userId_groupId: {
+        userId: session.user.id,
+        groupId,
+      },
+    },
+  });
+
+  if (!adminMembership || adminMembership.role !== "ADMIN") {
+    return NextResponse.json(
+      { error: "Only admins can remove members" },
+      { status: 403 }
+    );
+  }
+
+  const { userId } = await request.json();
+
+  if (!userId) {
+    return NextResponse.json(
+      { error: "userId is required" },
+      { status: 400 }
+    );
+  }
+
+  if (userId === session.user.id) {
+    return NextResponse.json(
+      { error: "You cannot remove yourself" },
+      { status: 400 }
+    );
+  }
+
+  const targetMembership = await prisma.membership.findUnique({
+    where: {
+      userId_groupId: {
+        userId,
+        groupId,
+      },
+    },
+  });
+
+  if (!targetMembership) {
+    return NextResponse.json(
+      { error: "Member not found" },
+      { status: 404 }
+    );
+  }
+
+  if (targetMembership.role === "ADMIN") {
+    return NextResponse.json(
+      { error: "Cannot remove an admin" },
+      { status: 400 }
+    );
+  }
+
+  await prisma.membership.delete({
+    where: {
+      userId_groupId: {
+        userId,
+        groupId,
+      },
+    },
+  });
+
+  return NextResponse.json({ success: true });
+}

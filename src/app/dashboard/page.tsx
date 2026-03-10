@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CURRENCY_SYMBOL } from "@/lib/constants";
+import { useI18n } from "@/lib/i18n/context";
 
 interface GroupSummary {
   id: string;
@@ -14,6 +15,7 @@ interface GroupSummary {
 
 export default function DashboardPage() {
   const { data: session } = useSession();
+  const { t } = useI18n();
   const [groups, setGroups] = useState<GroupSummary[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -32,27 +34,27 @@ export default function DashboardPage() {
       {/* Welcome */}
       <div>
         <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">
-          Welcome back, <span className="gradient-text">{session?.user?.name?.split(" ")[0] || "Player"}</span>
+          {t("welcomeBack")} <span className="gradient-text">{session?.user?.name?.split(" ")[0] || "Player"}</span>
         </h1>
-        <p className="text-gray-400 mt-1 text-sm sm:text-base">Here&apos;s what&apos;s happening in your markets.</p>
+        <p className="text-gray-400 mt-1 text-sm sm:text-base">{t("whatsHappening")}</p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
         <div className="card-stat">
-          <span className="text-xs sm:text-sm text-gray-400">My Groups</span>
+          <span className="text-xs sm:text-sm text-gray-400">{t("myGroups")}</span>
           <span className="text-xl sm:text-2xl font-bold font-mono">{groups.length}</span>
         </div>
         <div className="card-stat">
-          <span className="text-xs sm:text-sm text-gray-400">Active Markets</span>
+          <span className="text-xs sm:text-sm text-gray-400">{t("activeMarkets")}</span>
           <span className="text-xl sm:text-2xl font-bold font-mono">
             {groups.reduce((sum, g) => sum + g._count.questions, 0)}
           </span>
         </div>
         <div className="card-stat col-span-2 sm:col-span-1">
-          <span className="text-xs sm:text-sm text-gray-400">Currency</span>
+          <span className="text-xs sm:text-sm text-gray-400">{t("currency")}</span>
           <span className="text-xl sm:text-2xl font-bold font-mono text-green-400">
-            {CURRENCY_SYMBOL} {CURRENCY_SYMBOL === "₪" ? "Shekel" : "Coins"}
+            {CURRENCY_SYMBOL} {t("shekel")}
           </span>
         </div>
       </div>
@@ -60,9 +62,9 @@ export default function DashboardPage() {
       {/* Groups */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base sm:text-lg font-semibold">My Groups</h2>
+          <h2 className="text-base sm:text-lg font-semibold">{t("myGroups")}</h2>
           <Link href="/dashboard/groups/new" className="btn-primary text-xs sm:text-sm !py-2 !px-3 sm:!px-4">
-            + Create Group
+            + {t("createGroup")}
           </Link>
         </div>
 
@@ -82,10 +84,10 @@ export default function DashboardPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold mb-2">No groups yet</h3>
-            <p className="text-gray-400 mb-6 text-sm sm:text-base">Create your first group and invite friends to start predicting!</p>
+            <h3 className="text-lg font-semibold mb-2">{t("noGroupsYet")}</h3>
+            <p className="text-gray-400 mb-6 text-sm sm:text-base">{t("noGroupsDesc")}</p>
             <Link href="/dashboard/groups/new" className="btn-primary">
-              Create Your First Group
+              {t("createYourFirstGroup")}
             </Link>
           </div>
         ) : (
@@ -98,11 +100,11 @@ export default function DashboardPage() {
               >
                 <h3 className="font-semibold text-white mb-2">{group.name}</h3>
                 <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-400">
-                  <span>{group._count.members} members</span>
-                  <span>{group._count.questions} markets</span>
+                  <span>{group._count.members} {t("members")}</span>
+                  <span>{group._count.questions} {t("markets")}</span>
                 </div>
                 <div className="mt-3 text-xs font-mono text-gray-600">
-                  Code: {group.inviteCode}
+                  {t("code")}: {group.inviteCode}
                 </div>
               </Link>
             ))}
@@ -112,19 +114,19 @@ export default function DashboardPage() {
 
       {/* Quick actions */}
       <div className="glass p-4 sm:p-6">
-        <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Quick Actions</h2>
+        <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">{t("quickActions")}</h2>
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
           <Link href="/dashboard/groups/new" className="btn-secondary text-sm !py-2 text-center">
-            Create Group
+            {t("createGroup")}
           </Link>
           <button
             onClick={() => {
-              const code = prompt("Enter invite code:");
+              const code = prompt(t("enterInviteCode"));
               if (code) window.location.href = `/join/${code}`;
             }}
             className="btn-secondary text-sm !py-2"
           >
-            Join with Code
+            {t("joinWithCode")}
           </button>
         </div>
       </div>

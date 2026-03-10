@@ -3,11 +3,13 @@
 import { useState, useRef, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 import Image from "next/image";
+import { useI18n } from "@/lib/i18n/context";
 
 export default function UserMenu() {
   const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const { t } = useI18n();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -74,7 +76,7 @@ export default function UserMenu() {
                 d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
               />
             </svg>
-            Sign Out
+            {t("signOut")}
           </button>
         </div>
       )}

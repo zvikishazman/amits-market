@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CURRENCY_SYMBOL, DEFAULT_STARTING_BALANCE, MIN_STARTING_BALANCE, MAX_STARTING_BALANCE } from "@/lib/constants";
 import { formatCurrency } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n/context";
 
 export default function CreateGroupPage() {
   const [name, setName] = useState("");
@@ -11,6 +12,7 @@ export default function CreateGroupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+  const { t } = useI18n();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -18,7 +20,7 @@ export default function CreateGroupPage() {
 
     const balance = parseInt(startingBalance) || DEFAULT_STARTING_BALANCE;
     if (balance < MIN_STARTING_BALANCE || balance > MAX_STARTING_BALANCE) {
-      setError(`Starting balance must be between ${CURRENCY_SYMBOL}${formatCurrency(MIN_STARTING_BALANCE)} and ${CURRENCY_SYMBOL}${formatCurrency(MAX_STARTING_BALANCE)}`);
+      setError(`${t("startingBalanceRange")} ${CURRENCY_SYMBOL}${formatCurrency(MIN_STARTING_BALANCE)} ${t("and")} ${CURRENCY_SYMBOL}${formatCurrency(MAX_STARTING_BALANCE)}`);
       return;
     }
 
@@ -34,13 +36,13 @@ export default function CreateGroupPage() {
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || "Failed to create group");
+        throw new Error(data.error || t("failedToCreateGroup"));
       }
 
       const data = await res.json();
       router.push(`/dashboard/groups/${data.group.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError(err instanceof Error ? err.message : t("somethingWentWrong"));
       setLoading(false);
     }
   }
@@ -50,21 +52,21 @@ export default function CreateGroupPage() {
   return (
     <div className="max-w-lg mx-auto space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-2xl font-bold">Create a Group</h1>
-        <p className="text-gray-400 mt-1">Start a new prediction market group for your friends.</p>
+        <h1 className="text-2xl font-bold">{t("createAGroup")}</h1>
+        <p className="text-gray-400 mt-1">{t("createAGroupDesc")}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="glass p-6 space-y-6">
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
-            Group Name
+            {t("groupName")}
           </label>
           <input
             id="name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="e.g., Weekend Predictions, Office Bets..."
+            placeholder={t("groupNamePlaceholder2")}
             className="input-field"
             maxLength={50}
             required
@@ -73,7 +75,7 @@ export default function CreateGroupPage() {
 
         <div>
           <label htmlFor="balance" className="block text-sm font-medium text-gray-300 mb-2">
-            Starting Balance per Member
+            {t("startingBalancePerMember")}
           </label>
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-lg">{CURRENCY_SYMBOL}</span>
@@ -105,9 +107,7 @@ export default function CreateGroupPage() {
               </button>
             ))}
           </div>
-          <p className="text-xs text-gray-500 mt-2">
-            Every member will receive this amount when they join.
-          </p>
+          <p className="text-xs text-gray-500 mt-2">{t("everyMemberReceives")}</p>
         </div>
 
         {error && (
@@ -117,44 +117,36 @@ export default function CreateGroupPage() {
         )}
 
         <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="btn-secondary flex-1"
-          >
-            Cancel
+          <button type="button" onClick={() => router.back()} className="btn-secondary flex-1">
+            {t("cancel")}
           </button>
-          <button
-            type="submit"
-            disabled={loading || !name.trim()}
-            className="btn-primary flex-1"
-          >
+          <button type="submit" disabled={loading || !name.trim()} className="btn-primary flex-1">
             {loading ? (
               <span className="flex items-center justify-center gap-2">
                 <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Creating...
+                {t("creating")}
               </span>
             ) : (
-              "Create Group"
+              t("createGroup")
             )}
           </button>
         </div>
       </form>
 
       <div className="glass p-6">
-        <h3 className="font-medium mb-2">What happens next?</h3>
+        <h3 className="font-medium mb-2">{t("whatHappensNext")}</h3>
         <ul className="text-sm text-gray-400 space-y-2">
           <li className="flex items-start gap-2">
             <span className="text-blue-400 mt-0.5">1.</span>
-            You&apos;ll get an invite code and link to share with friends
+            {t("youllGetInviteCode")}
           </li>
           <li className="flex items-start gap-2">
             <span className="text-blue-400 mt-0.5">2.</span>
-            Everyone starts with {CURRENCY_SYMBOL}{formatCurrency(parseInt(startingBalance) || DEFAULT_STARTING_BALANCE)} to bet with
+            {t("everyoneStartsWith")} {CURRENCY_SYMBOL}{formatCurrency(parseInt(startingBalance) || DEFAULT_STARTING_BALANCE)} {t("toBetWith")}
           </li>
           <li className="flex items-start gap-2">
             <span className="text-blue-400 mt-0.5">3.</span>
-            Create questions and start making predictions!
+            {t("createQuestionsAndStart")}
           </li>
         </ul>
       </div>
