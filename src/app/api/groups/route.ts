@@ -22,11 +22,22 @@ export async function GET() {
           questions: true,
         },
       },
+      members: {
+        where: { userId: session.user.id },
+        select: { role: true },
+      },
     },
     orderBy: { createdAt: "desc" },
   });
 
-  return NextResponse.json({ groups });
+  // Flatten the role into the group object
+  const groupsWithRole = groups.map((g) => ({
+    ...g,
+    myRole: g.members[0]?.role || "MEMBER",
+    members: undefined,
+  }));
+
+  return NextResponse.json({ groups: groupsWithRole });
 }
 
 export async function POST(request: Request) {
@@ -34,7 +45,12 @@ export async function POST(request: Request) {
   if (!session?.user?.id)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const body = await request.json();
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
   const { name, startingBalance } = body;
 
   if (!name || typeof name !== "string" || name.trim().length === 0) {

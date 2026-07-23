@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { useI18n } from "@/lib/i18n/context";
 
-export default function GoogleSignInButton() {
+export default function GoogleSignInButton({ callbackUrl }: { callbackUrl?: string } = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const { t } = useI18n();
 
@@ -20,7 +20,7 @@ export default function GoogleSignInButton() {
   const handleClick = async () => {
     setIsLoading(true);
     try {
-      await signIn("google", { callbackUrl: "/dashboard" });
+      await signIn("google", { callbackUrl: callbackUrl || "/dashboard" });
     } catch {
       setIsLoading(false);
     }

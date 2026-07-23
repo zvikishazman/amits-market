@@ -91,14 +91,20 @@ export const translations = {
     startingBalance: "starting balance",
     copyInviteLink: "Copy Invite Link",
     linkCopied: "Link copied!",
-    newMarket: "+ New Market",
+    newMarket: "New Question",
     inviteCode: "Invite Code",
     copyInviteLink2: "Copy invite link",
     openMarkets: "Open Markets",
     resolved: "Resolved",
     noMarketsYet: "No markets yet",
     noMarketsDesc: "Create the first prediction market for your group!",
-    createMarket: "Create Market",
+    openQuestions: "Open Questions",
+    closedQuestions: "Closed Questions",
+    noOpenQuestions: "No open questions",
+    noOpenQuestionsDesc: "Create a new question for your group to predict!",
+    noClosedQuestions: "No closed questions yet",
+    noClosedQuestionsDesc: "Resolved questions will appear here.",
+    createMarket: "Create Question",
     options: "options",
     by: "by",
     groupNotFound: "Group not found",
@@ -125,7 +131,7 @@ export const translations = {
     settleUp: "Settle Up",
 
     // Create Market
-    createAMarket: "Create a Market",
+    createAMarket: "Create a Question",
     createMarketDesc: "Set a question and let your group predict the outcome.",
     question: "Question",
     questionPlaceholder: "e.g., Who will win the Super Bowl?",
@@ -243,16 +249,16 @@ export const translations = {
     failedToResolve: "Failed to resolve",
     failedToSave: "Failed to save",
     failedToCreateGroup: "Failed to create group",
-    failedToCreateMarket: "Failed to create market",
+    failedToCreateMarket: "Failed to create question",
     somethingWentWrong: "Something went wrong",
     startingBalanceRange: "Starting balance must be between",
     and: "and",
 
     // Time
     justNow: "just now",
-    minutesAgo: "m ago",
-    hoursAgo: "h ago",
-    daysAgo: "d ago",
+    minutesAgo: "min ago",
+    hoursAgo: "hours ago",
+    daysAgo: "days ago",
 
     // Navigation
     dashboard: "Dashboard",
@@ -261,15 +267,15 @@ export const translations = {
     settings: "Settings",
 
     // Stats
-    wins: "W",
-    losses: "L",
+    wins: "Wins",
+    losses: "Losses",
     unknown: "Unknown",
 
     // Countdown
-    daysShort: "d",
-    hoursShort: "h",
-    minutesShort: "m",
-    secondsShort: "s",
+    daysShort: "days",
+    hoursShort: "hrs",
+    minutesShort: "min",
+    secondsShort: "sec",
 
     // More error fallbacks
     failedToRecord: "Failed to record",
@@ -287,6 +293,49 @@ export const translations = {
     open: "OPEN",
     resolved2: "RESOLVED",
     closed2: "CLOSED",
+
+    // Remove vote
+    removeVote: "Remove Vote",
+    removingVote: "Removing...",
+    voteRemoved: "Vote removed! Your balance has been refunded.",
+    failedToRemoveVote: "Failed to remove vote",
+    confirmRemoveVote: "Remove your vote? Your bet will be refunded.",
+    deadlineRequired: "Please set a betting deadline.",
+
+    // Countdown
+    timeLeft: "Time left",
+    days: "days",
+    hours: "hours",
+    minutes: "minutes",
+    seconds: "seconds",
+
+    // Resolution details
+    profitLeaderboard: "Profit Leaderboard",
+    whoOwesWhom: "Who Owes Whom",
+    betsRefunded: "All bets have been refunded.",
+    noWinnerRefund: "No one bet on the winning answer. All bets have been refunded.",
+    markAsPaid: "I Paid",
+    didntVote: "Didn't vote",
+    refunded: "Refunded",
+    yourVote: "Your vote",
+    winnerAnswer: "Winner",
+    paidDone: "Paid",
+    totalOutstanding: "Total Outstanding",
+    owes: "owes",
+    deleteGroup: "Delete Group",
+    confirmDeleteGroup: "Are you sure you want to delete this group? All questions, bets, and data will be permanently lost.",
+    groupDeleted: "Group deleted",
+    failedToDeleteGroup: "Failed to delete group",
+    pendingResolution: "Pending Resolution",
+    newQuestionNotification: "New question in",
+    enableNotifications: "Enable Notifications",
+    notificationsEnabled: "Notifications enabled",
+    hideFromMembers: "Hide from members",
+    hideFromMembersDesc: "Selected members won't see this question",
+    hiddenFromCount: "Hidden from",
+    membersCount: "members",
+    selectMembers: "Select members to hide from",
+    hidden: "Hidden",
   },
   he: {
     // Common
@@ -378,14 +427,20 @@ export const translations = {
     startingBalance: "יתרה התחלתית",
     copyInviteLink: "העתק קישור הזמנה",
     linkCopied: "הקישור הועתק!",
-    newMarket: "+ שוק חדש",
+    newMarket: "שאלה חדשה",
     inviteCode: "קוד הזמנה",
     copyInviteLink2: "העתק קישור הזמנה",
     openMarkets: "שווקים פתוחים",
     resolved: "הסתיימו",
     noMarketsYet: "אין עדיין שווקים",
     noMarketsDesc: "צור את שוק הניחושים הראשון לקבוצה שלך!",
-    createMarket: "צור שוק",
+    openQuestions: "שאלות פתוחות",
+    closedQuestions: "שאלות סגורות",
+    noOpenQuestions: "אין שאלות פתוחות",
+    noOpenQuestionsDesc: "צור שאלה חדשה לקבוצה שלך לנחש!",
+    noClosedQuestions: "אין עדיין שאלות סגורות",
+    noClosedQuestionsDesc: "שאלות שהוכרעו יופיעו כאן.",
+    createMarket: "צור שאלה",
     options: "אפשרויות",
     by: "על ידי",
     groupNotFound: "הקבוצה לא נמצאה",
@@ -412,7 +467,7 @@ export const translations = {
     settleUp: "סילוק חובות",
 
     // Create Market
-    createAMarket: "צור שוק",
+    createAMarket: "צור שאלה",
     createMarketDesc: "הגדר שאלה ותן לקבוצה שלך לנחש את התוצאה.",
     question: "שאלה",
     questionPlaceholder: "למשל, מי ינצח בגמר?",
@@ -530,16 +585,16 @@ export const translations = {
     failedToResolve: "ההכרעה נכשלה",
     failedToSave: "השמירה נכשלה",
     failedToCreateGroup: "יצירת הקבוצה נכשלה",
-    failedToCreateMarket: "יצירת השוק נכשלה",
+    failedToCreateMarket: "יצירת השאלה נכשלה",
     somethingWentWrong: "משהו השתבש",
     startingBalanceRange: "היתרה ההתחלתית חייבת להיות בין",
     and: "ל",
 
     // Time
     justNow: "עכשיו",
-    minutesAgo: "ד׳ לפני",
-    hoursAgo: "ש׳ לפני",
-    daysAgo: "י׳ לפני",
+    minutesAgo: "דקות לפני",
+    hoursAgo: "שעות לפני",
+    daysAgo: "ימים לפני",
 
     // Navigation
     dashboard: "לוח בקרה",
@@ -548,15 +603,15 @@ export const translations = {
     settings: "הגדרות",
 
     // Stats
-    wins: "נ",
-    losses: "ה",
+    wins: "נצחונות",
+    losses: "הפסדים",
     unknown: "לא ידוע",
 
     // Countdown
-    daysShort: "י",
-    hoursShort: "ש",
-    minutesShort: "ד",
-    secondsShort: "ש",
+    daysShort: "ימים",
+    hoursShort: "שעות",
+    minutesShort: "דקות",
+    secondsShort: "שניות",
 
     // More error fallbacks
     failedToRecord: "הרישום נכשל",
@@ -574,6 +629,49 @@ export const translations = {
     open: "פתוח",
     resolved2: "הוכרע",
     closed2: "נסגר",
+
+    // Remove vote
+    removeVote: "הסר הצבעה",
+    removingVote: "מסיר...",
+    voteRemoved: "ההצבעה הוסרה! היתרה שלך הוחזרה.",
+    failedToRemoveVote: "הסרת ההצבעה נכשלה",
+    confirmRemoveVote: "להסיר את ההצבעה? ההימור יוחזר.",
+    deadlineRequired: "יש להגדיר מועד אחרון להימורים.",
+
+    // Countdown
+    timeLeft: "זמן שנותר",
+    days: "ימים",
+    hours: "שעות",
+    minutes: "דקות",
+    seconds: "שניות",
+
+    // Resolution details
+    profitLeaderboard: "טבלת רווחים",
+    whoOwesWhom: "מי חייב למי",
+    betsRefunded: "כל ההימורים הוחזרו.",
+    noWinnerRefund: "אף אחד לא הימר על התשובה המנצחת. כל ההימורים הוחזרו.",
+    markAsPaid: "שילמתי",
+    didntVote: "לא הצבעת",
+    refunded: "הוחזר",
+    yourVote: "ההצבעה שלך",
+    winnerAnswer: "מנצח",
+    paidDone: "שולם",
+    totalOutstanding: "סה״כ חובות",
+    owes: "חייב ל",
+    deleteGroup: "מחק קבוצה",
+    confirmDeleteGroup: "האם אתה בטוח שברצונך למחוק את הקבוצה? כל השאלות, ההימורים והנתונים יימחקו לצמיתות.",
+    groupDeleted: "הקבוצה נמחקה",
+    failedToDeleteGroup: "מחיקת הקבוצה נכשלה",
+    pendingResolution: "ממתין להכרעה",
+    newQuestionNotification: "שאלה חדשה ב",
+    enableNotifications: "הפעל התראות",
+    notificationsEnabled: "התראות פעילות",
+    hideFromMembers: "הסתר מחברים",
+    hideFromMembersDesc: "חברים שנבחרו לא יראו את השאלה הזו",
+    hiddenFromCount: "מוסתר מ",
+    membersCount: "חברים",
+    selectMembers: "בחר חברים להסתיר מהם",
+    hidden: "מוסתר",
   },
 } as const;
 

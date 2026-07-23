@@ -22,6 +22,8 @@ model User {
   createdQuestions    Question[]    @relation("QuestionCreator")
   sentSettlements     Settlement[]  @relation("SettlementFrom")
   receivedSettlements Settlement[]  @relation("SettlementTo")
+  pushSubscriptions   PushSubscription[]
+  hiddenQuestions    Question[]    @relation("HiddenQuestions")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -103,9 +105,10 @@ model Question {
   betAmount        Float?
   showBetChoices   Boolean  @default(false)
 
-  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  creator User   @relation("QuestionCreator", fields: [creatorId], references: [id])
-  options Option[]
+  group      Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  creator    User   @relation("QuestionCreator", fields: [creatorId], references: [id])
+  options    Option[]
+  hiddenFrom User[] @relation("HiddenQuestions")
 
   closesAt   DateTime?
   resolvedAt DateTime?
@@ -133,6 +136,18 @@ model Bet {
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   option Option @relation(fields: [optionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+model PushSubscription {
+  id       String @id @default(cuid())
+  userId   String
+  endpoint String @unique
+  p256dh   String
+  auth     String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 }

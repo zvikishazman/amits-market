@@ -1,14 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { CURRENCY_SYMBOL } from "@/lib/constants";
 import { useI18n } from "@/lib/i18n/context";
+
+interface GroupMember {
+  id: string;
+  user: { id: string; name: string; image: string | null };
+  role: string;
+}
 
 export default function CreateQuestionPage() {
   const router = useRouter();
   const params = useParams();
   const groupId = params.groupId as string;
+  const { data: session } = useSession();
   const { t } = useI18n();
 
   const [title, setTitle] = useState("");
@@ -19,6 +27,22 @@ export default function CreateQuestionPage() {
   const [showBetChoices, setShowBetChoices] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Hide from members
+  const [members, setMembers] = useState<GroupMember[]>([]);
+  const [hiddenFromUserIds, setHiddenFromUserIds] = useState<Set<string>>(new Set());
+  const [showHideSection, setShowHideSection] = useState(false);
+
+  useEffect(() => {
+    fetch(`/api/groups/${groupId}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.group?.members) {
+          setMembers(data.group.members);
+        }
+      })
+      .catch(() => {});
+  }, [groupId]);
 
   function addOption() {
     if (options.length >= 10) return;
@@ -39,7 +63,24 @@ export default function CreateQuestionPage() {
   function getMinDateTime() {
     const now = new Date();
     now.setMinutes(now.getMinutes() + 5);
-    return now.toISOString().slice(0, 16);
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    const hours = String(now.getHours()).padStart(2, "0");
+    const mins = String(now.getMinutes()).padStart(2, "0");
+    return `${year}-${month}-${day}T${hours}:${mins}`;
+  }
+
+  function toggleHiddenUser(userId: string) {
+    setHiddenFromUserIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(userId)) {
+        next.delete(userId);
+      } else {
+        next.add(userId);
+      }
+      return next;
+    });
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -56,6 +97,11 @@ export default function CreateQuestionPage() {
       return;
     }
 
+    if (!closesAt) {
+      setError(t("deadlineRequired"));
+      return;
+    }
+
     setLoading(true);
     setError("");
 
@@ -68,8 +114,9 @@ export default function CreateQuestionPage() {
           description: description.trim() || undefined,
           options: filteredOptions,
           betAmount: amount,
-          closesAt: closesAt || undefined,
+          closesAt: closesAt ? new Date(closesAt).toISOString() : undefined,
           showBetChoices,
+          hiddenFromUserIds: hiddenFromUserIds.size > 0 ? Array.from(hiddenFromUserIds) : undefined,
         }),
       });
 
@@ -85,6 +132,9 @@ export default function CreateQuestionPage() {
       setLoading(false);
     }
   }
+
+  // Other members (not the current user)
+  const otherMembers = members.filter((m) => m.user.id !== session?.user?.id);
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 animate-fade-in">
@@ -129,7 +179,7 @@ export default function CreateQuestionPage() {
           <div className="space-y-3">
             {options.map((option, i) => (
               <div key={i} className="flex gap-2">
-                <div className="w-8 h-12 flex items-center justify-center text-sm font-mono text-gray-500">{i + 1}.</div>
+                <div className="w-8 h-12 flex items-center justify-center text-sm font-mono text-gray-500" dir="ltr">{i + 1}.</div>
                 <input
                   type="text"
                   value={option}
@@ -178,12 +228,27 @@ export default function CreateQuestionPage() {
 
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-2">
-            {t("bettingDeadline")} <span className="text-gray-500">({t("optional")})</span>
+            {t("bettingDeadline")} <span className="text-red-400">*</span>
           </label>
-          <input type="datetime-local" value={closesAt} onChange={(e) => setClosesAt(e.target.value)} min={getMinDateTime()} className="input-field" />
-          <p className="text-xs text-gray-500 mt-2">
-            {closesAt ? `${t("noOneCanBetAfter")} ${new Date(closesAt).toLocaleString()}` : t("noDeadline")}
-          </p>
+          <div className="relative">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <input type="datetime-local" value={closesAt} onChange={(e) => setClosesAt(e.target.value)} min={getMinDateTime()} className="input-field pl-10 date-picker" required dir="ltr" />
+          </div>
+          {closesAt && (
+            <div className="mt-2 flex items-center gap-2 p-2 rounded-lg bg-blue-500/5 border border-blue-500/10">
+              <svg className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-xs text-blue-400">{t("noOneCanBetAfter")} {new Date(closesAt).toLocaleString()}</span>
+            </div>
+          )}
+          {!closesAt && (
+            <p className="text-xs text-red-400/70 mt-2">{t("deadlineRequired")}</p>
+          )}
         </div>
 
         {/* Privacy toggle */}
@@ -199,6 +264,72 @@ export default function CreateQuestionPage() {
             {showBetChoices ? t("showBetChoicesLabel") : t("hideBetChoicesLabel")}
           </span>
         </div>
+
+        {/* Hide from members */}
+        {otherMembers.length > 0 && (
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setShowHideSection(!showHideSection)}
+                className={`relative w-11 h-6 rounded-full transition-colors ${showHideSection ? "bg-blue-500" : "bg-gray-700"}`}
+              >
+                <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${showHideSection ? "translate-x-[22px]" : "translate-x-0.5"}`} />
+              </button>
+              <div>
+                <span className="text-sm text-gray-300">{t("hideFromMembers")}</span>
+                {hiddenFromUserIds.size > 0 && (
+                  <span className="text-xs text-amber-400 ml-2">({hiddenFromUserIds.size} {t("membersCount")})</span>
+                )}
+              </div>
+            </div>
+
+            {showHideSection && (
+              <div className="p-3 rounded-xl bg-gray-800/30 border border-gray-700/50 space-y-2">
+                <p className="text-xs text-gray-500 mb-2">{t("hideFromMembersDesc")}</p>
+                {otherMembers.map((member) => (
+                  <label
+                    key={member.user.id}
+                    className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-colors ${
+                      hiddenFromUserIds.has(member.user.id)
+                        ? "bg-amber-500/10 border border-amber-500/20"
+                        : "bg-gray-800/30 border border-transparent hover:bg-gray-800/50"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={hiddenFromUserIds.has(member.user.id)}
+                      onChange={() => toggleHiddenUser(member.user.id)}
+                      className="sr-only"
+                    />
+                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
+                      hiddenFromUserIds.has(member.user.id)
+                        ? "bg-amber-500 border-amber-500"
+                        : "border-gray-600"
+                    }`}>
+                      {hiddenFromUserIds.has(member.user.id) && (
+                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </div>
+                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-xs font-bold flex-shrink-0 overflow-hidden">
+                      {member.user.image ? (
+                        <img src={member.user.image} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        member.user.name?.[0] || "?"
+                      )}
+                    </div>
+                    <span className="text-sm text-gray-300 truncate">{member.user.name}</span>
+                    {member.role === "ADMIN" && (
+                      <span className="text-[10px] text-gray-500 px-1.5 py-0.5 bg-gray-800 rounded">{t("admin")}</span>
+                    )}
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {error && (
           <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">{error}</div>

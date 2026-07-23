@@ -44,7 +44,15 @@ export default function JoinPage() {
         setError(t("failedToValidateInvite"));
         setLoading(false);
       });
-  }, [code]);
+  }, [code, t]);
+
+  // Auto-join when user is signed in and group is loaded (e.g. after Google sign-in redirect)
+  useEffect(() => {
+    if (session && group && !joined && !joining && !error) {
+      handleJoin();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session, group]);
 
   async function handleJoin() {
     if (!session || !group) return;
@@ -154,7 +162,7 @@ export default function JoinPage() {
               ) : (
                 <div>
                   <p className="text-sm text-gray-400 mb-4">{t("signInToJoin")}</p>
-                  <GoogleSignInButton />
+                  <GoogleSignInButton callbackUrl={`/join/${code}`} />
                 </div>
               )}
             </div>

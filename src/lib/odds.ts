@@ -86,3 +86,44 @@ export function calculateResolutionPayouts(
 
   return payouts;
 }
+
+export interface DebtDetail {
+  fromUserId: string;
+  toUserId: string;
+  amount: number;
+}
+
+/**
+ * Calculate who owes whom after resolution.
+ * Each loser's bet is split evenly among all winners.
+ * So each loser owes each winner: loserBetAmount / numberOfWinners
+ */
+export function calculateDebts(
+  winningOptionId: string,
+  options: { id: string; bets: { userId: string; amount: number }[] }[]
+): DebtDetail[] {
+  const winningOption = options.find((o) => o.id === winningOptionId);
+  if (!winningOption) return [];
+
+  const winnerUserIds = winningOption.bets.map((b) => b.userId);
+  if (winnerUserIds.length === 0) return [];
+
+  const debts: DebtDetail[] = [];
+
+  // Each loser owes each winner: loser's bet / number of winners
+  for (const opt of options) {
+    if (opt.id === winningOptionId) continue;
+    for (const loserBet of opt.bets) {
+      const amountPerWinner = loserBet.amount / winnerUserIds.length;
+      for (const winnerId of winnerUserIds) {
+        debts.push({
+          fromUserId: loserBet.userId,
+          toUserId: winnerId,
+          amount: Math.round(amountPerWinner * 100) / 100,
+        });
+      }
+    }
+  }
+
+  return debts;
+}

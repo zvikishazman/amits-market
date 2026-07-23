@@ -10,6 +10,7 @@ interface GroupSummary {
   id: string;
   name: string;
   inviteCode: string;
+  myRole: string;
   _count: { members: number; questions: number };
 }
 
@@ -71,9 +72,9 @@ export default function DashboardPage() {
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="glass p-6 animate-pulse">
-                <div className="h-5 bg-gray-800 rounded w-2/3 mb-3" />
-                <div className="h-4 bg-gray-800 rounded w-1/3" />
+              <div key={i} className="glass p-6">
+                <div className="h-5 bg-gray-800 rounded w-2/3 mb-3 animate-shimmer" />
+                <div className="h-4 bg-gray-800 rounded w-1/3 animate-shimmer" />
               </div>
             ))}
           </div>
@@ -103,9 +104,11 @@ export default function DashboardPage() {
                   <span>{group._count.members} {t("members")}</span>
                   <span>{group._count.questions} {t("markets")}</span>
                 </div>
-                <div className="mt-3 text-xs font-mono text-gray-600">
-                  {t("code")}: {group.inviteCode}
-                </div>
+                {group.myRole === "ADMIN" && (
+                  <div className="mt-3 text-xs font-mono text-gray-500 bg-gray-800/30 rounded-lg px-2 py-1 inline-block">
+                    {t("code")}: {group.inviteCode}
+                  </div>
+                )}
               </Link>
             ))}
           </div>

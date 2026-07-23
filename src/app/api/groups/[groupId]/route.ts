@@ -52,9 +52,12 @@ export async function GET(
                 select: { bets: true },
               },
               bets: {
-                select: { amount: true },
+                select: { amount: true, userId: true, payout: true },
               },
             },
+          },
+          hiddenFrom: {
+            select: { id: true },
           },
         },
         orderBy: { createdAt: "desc" },
@@ -105,5 +108,80 @@ export async function GET(
     }
   }
 
-  return NextResponse.json({ group, memberStats });
+  // Filter hidden questions and add hiddenFromIds
+  const isAdmin = membership.role === "ADMIN";
+  const filteredQuestions = group.questions
+    .filter((q) => {
+      if (q.creatorId === session.user.id) return true;
+      if (isAdmin) return true;
+      return !q.hiddenFrom.some((u) => u.id === session.user.id);
+    })
+    .map((q) => ({
+      ...q,
+      hiddenFromIds: q.hiddenFrom.map((u) => u.id),
+      hiddenFrom: undefined,
+    }));
+
+  return NextResponse.json({
+    group: { ...group, questions: filteredQuestions },
+    memberStats,
+  });
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: { groupId: string } }
+) {
+  const session = await auth();
+  if (!session?.user?.id)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { groupId } = params;
+
+  // Check if user is admin of this group
+  const membership = await prisma.membership.findUnique({
+    where: {
+      userId_groupId: {
+        userId: session.user.id,
+        groupId,
+      },
+    },
+  });
+
+  if (!membership || membership.role !== "ADMIN") {
+    return NextResponse.json(
+      { error: "Only admins can delete groups" },
+      { status: 403 }
+    );
+  }
+
+  // Delete everything in order (respecting foreign keys)
+  await prisma.$transaction(async (tx) => {
+    // Delete bets (belong to options which belong to questions)
+    await tx.bet.deleteMany({
+      where: { option: { question: { groupId } } },
+    });
+    // Delete options
+    await tx.option.deleteMany({
+      where: { question: { groupId } },
+    });
+    // Delete questions
+    await tx.question.deleteMany({
+      where: { groupId },
+    });
+    // Delete settlements
+    await tx.settlement.deleteMany({
+      where: { groupId },
+    });
+    // Delete memberships
+    await tx.membership.deleteMany({
+      where: { groupId },
+    });
+    // Delete the group
+    await tx.group.delete({
+      where: { id: groupId },
+    });
+  });
+
+  return NextResponse.json({ success: true });
 }

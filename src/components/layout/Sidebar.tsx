@@ -49,11 +49,12 @@ export default function Sidebar({ onClose }: SidebarProps) {
 
   const isActive = (href: string) => {
     if (href === "/dashboard") return pathname === "/dashboard";
-    return pathname.startsWith(href);
+    if (href === "/dashboard/groups") return pathname === "/dashboard/groups" || (pathname.startsWith("/dashboard/groups/") && pathname !== "/dashboard/groups/new");
+    return pathname === href;
   };
 
   return (
-    <aside className="h-full flex flex-col w-64 bg-gray-900/80 backdrop-blur-xl border-r border-gray-800/50">
+    <aside className="h-full flex flex-col w-64 bg-gray-900/80 backdrop-blur-xl border-e border-gray-800/50">
       {/* Logo */}
       <div className="p-6 flex items-center justify-between">
         <Logo />

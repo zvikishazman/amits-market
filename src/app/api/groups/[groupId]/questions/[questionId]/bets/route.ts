@@ -75,7 +75,12 @@ export async function POST(
     );
   }
 
-  const body = await request.json();
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
   const { optionId } = body;
 
   if (!optionId) {
@@ -189,6 +194,107 @@ export async function POST(
   return NextResponse.json({ bet: result, odds }, { status: 201 });
 }
 
+// Remove bet (refund)
+export async function DELETE(
+  request: Request,
+  { params }: { params: { groupId: string; questionId: string } }
+) {
+  const session = await auth();
+  if (!session?.user?.id)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { groupId, questionId } = params;
+
+  const membership = await prisma.membership.findUnique({
+    where: {
+      userId_groupId: {
+        userId: session.user.id,
+        groupId,
+      },
+    },
+  });
+
+  if (!membership) {
+    return NextResponse.json(
+      { error: "You are not a member of this group" },
+      { status: 403 }
+    );
+  }
+
+  const question = await prisma.question.findUnique({
+    where: { id: questionId, groupId },
+    include: {
+      options: {
+        include: {
+          bets: {
+            select: { id: true, amount: true, userId: true },
+          },
+        },
+      },
+    },
+  });
+
+  if (!question) {
+    return NextResponse.json({ error: "Question not found" }, { status: 404 });
+  }
+
+  if (question.status !== "OPEN") {
+    return NextResponse.json({ error: "Question is not open" }, { status: 400 });
+  }
+
+  if (question.closesAt && new Date(question.closesAt) <= new Date()) {
+    return NextResponse.json({ error: "Betting deadline has passed" }, { status: 400 });
+  }
+
+  // Find user's existing bet
+  let existingBet: { id: string; amount: number; userId: string } | null = null;
+  for (const opt of question.options) {
+    const found = opt.bets.find((b) => b.userId === session.user.id);
+    if (found) {
+      existingBet = found;
+      break;
+    }
+  }
+
+  if (!existingBet) {
+    return NextResponse.json({ error: "You haven't placed a bet yet" }, { status: 400 });
+  }
+
+  // Refund the bet
+  await prisma.$transaction(async (tx) => {
+    await tx.bet.delete({
+      where: { id: existingBet!.id },
+    });
+
+    await tx.membership.update({
+      where: {
+        userId_groupId: {
+          userId: session.user.id,
+          groupId,
+        },
+      },
+      data: {
+        balance: { increment: existingBet!.amount },
+      },
+    });
+  });
+
+  const updatedQuestion = await prisma.question.findUnique({
+    where: { id: questionId },
+    include: {
+      options: {
+        include: {
+          bets: { select: { amount: true } },
+        },
+      },
+    },
+  });
+
+  const odds = updatedQuestion ? calculateOdds(updatedQuestion.options) : null;
+
+  return NextResponse.json({ success: true, odds });
+}
+
 // Change bet (move to a different option)
 export async function PUT(
   request: Request,
@@ -216,7 +322,12 @@ export async function PUT(
     );
   }
 
-  const body = await request.json();
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
   const { optionId } = body;
 
   if (!optionId) {

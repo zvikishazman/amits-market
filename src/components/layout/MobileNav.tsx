@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 
 interface MobileNavProps {
@@ -9,6 +9,17 @@ interface MobileNavProps {
 }
 
 export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
+  const [isRtl, setIsRtl] = useState(false);
+
+  useEffect(() => {
+    setIsRtl(document.documentElement.dir === "rtl");
+    const observer = new MutationObserver(() => {
+      setIsRtl(document.documentElement.dir === "rtl");
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["dir"] });
+    return () => observer.disconnect();
+  }, []);
+
   // Prevent body scroll when open
   useEffect(() => {
     if (isOpen) {
@@ -21,6 +32,12 @@ export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
     };
   }, [isOpen]);
 
+  const closedTransform = isRtl ? "translateX(100%)" : "translateX(-100%)";
+  const panelStyle: React.CSSProperties = {
+    transform: isOpen ? "translateX(0)" : closedTransform,
+    ...(isRtl ? { right: 0, left: "auto" } : { left: 0, right: "auto" }),
+  };
+
   return (
     <>
       {/* Overlay */}
@@ -32,8 +49,8 @@ export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
 
       {/* Sidebar panel */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 transition-transform duration-300 ease-out lg:hidden
-          ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
+        className="fixed inset-y-0 z-50 w-64 transition-transform duration-300 ease-out lg:hidden"
+        style={panelStyle}
       >
         <Sidebar onClose={onClose} />
       </div>

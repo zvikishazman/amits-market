@@ -54,7 +54,12 @@ export async function POST(
     return NextResponse.json({ error: "Not a member" }, { status: 403 });
   }
 
-  const body = await request.json();
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
   const { toUserId, amount } = body;
 
   if (!toUserId || typeof amount !== "number" || amount <= 0) {

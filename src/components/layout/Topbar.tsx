@@ -7,7 +7,7 @@ interface TopbarProps {
 
 export default function Topbar({ onMenuClick }: TopbarProps) {
   return (
-    <header className="sticky top-0 z-30 h-16 flex items-center justify-between px-4 sm:px-6 bg-gray-900/60 backdrop-blur-xl border-b border-gray-800/50">
+    <header className="sticky top-0 z-30 h-14 sm:h-16 flex items-center justify-between px-3 sm:px-6 bg-gray-900/60 backdrop-blur-xl border-b border-gray-800/50">
       {/* Left: hamburger + page title area */}
       <div className="flex items-center gap-4">
         {onMenuClick && (

@@ -32,9 +32,14 @@ body {
     background: #334155;
   }
 
-  /* Smooth scrolling */
+  /* Smooth scrolling & prevent horizontal overflow */
   html {
     scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
+
+  body {
+    overflow-x: hidden;
   }
 }
 
@@ -105,6 +110,47 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .animate-slide-in {
+    animation: slideIn 0.3s ease-out;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .animate-shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 /* RTL support */
@@ -119,4 +165,44 @@ body {
 [dir="rtl"] .font-mono {
   direction: ltr;
   unicode-bidi: embed;
+}
+
+/* Date picker styling */
+.date-picker::-webkit-calendar-picker-indicator {
+  filter: invert(0.5) sepia(1) saturate(5) hue-rotate(175deg);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+.date-picker::-webkit-calendar-picker-indicator:hover {
+  filter: invert(0.7) sepia(1) saturate(5) hue-rotate(175deg);
+  background: rgba(59, 130, 246, 0.1);
+}
+.date-picker::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
+}
+.date-picker::-webkit-datetime-edit-text {
+  color: #64748b;
+  padding: 0 2px;
+}
+.date-picker::-webkit-datetime-edit-month-field,
+.date-picker::-webkit-datetime-edit-day-field,
+.date-picker::-webkit-datetime-edit-year-field,
+.date-picker::-webkit-datetime-edit-hour-field,
+.date-picker::-webkit-datetime-edit-minute-field,
+.date-picker::-webkit-datetime-edit-ampm-field {
+  color: #e2e8f0;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+.date-picker::-webkit-datetime-edit-month-field:focus,
+.date-picker::-webkit-datetime-edit-day-field:focus,
+.date-picker::-webkit-datetime-edit-year-field:focus,
+.date-picker::-webkit-datetime-edit-hour-field:focus,
+.date-picker::-webkit-datetime-edit-minute-field:focus,
+.date-picker::-webkit-datetime-edit-ampm-field:focus {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  outline: none;
 }

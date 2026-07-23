@@ -57,7 +57,7 @@ export default function UserMenu() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 glass p-2 shadow-xl shadow-black/20 z-50">
+        <div className="absolute end-0 mt-2 w-64 glass p-2 shadow-xl shadow-black/20 z-50">
           <div className="px-3 py-3 border-b border-gray-800/50 mb-2">
             <p className="text-sm font-semibold text-white">{session.user.name}</p>
             <p className="text-xs text-gray-400 mt-0.5">{session.user.email}</p>

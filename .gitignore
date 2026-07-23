@@ -41,3 +41,6 @@ prisma/dev.db-journal
 next-env.d.ts
 
 .vercel
+
+# local claude code config
+/.claude/
