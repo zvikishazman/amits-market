@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import { CURRENCY_SYMBOL } from "@/lib/constants";
 import { useI18n } from "@/lib/i18n/context";
 
@@ -315,7 +316,7 @@ export default function CreateQuestionPage() {
                     </div>
                     <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-xs font-bold flex-shrink-0 overflow-hidden">
                       {member.user.image ? (
-                        <img src={member.user.image} alt="" className="w-full h-full object-cover" />
+                        <Image src={member.user.image} alt="" width={28} height={28} className="w-full h-full object-cover" />
                       ) : (
                         member.user.name?.[0] || "?"
                       )}

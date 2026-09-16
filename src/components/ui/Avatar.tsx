@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
 interface AvatarProps {
   src?: string | null;
@@ -37,9 +38,11 @@ export default function Avatar({
       )}
     >
       {src ? (
-        <img
+        <Image
           src={src}
           alt={name}
+          width={56}
+          height={56}
           className="h-full w-full rounded-full object-cover"
         />
       ) : (

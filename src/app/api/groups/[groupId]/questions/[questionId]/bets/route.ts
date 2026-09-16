@@ -1,17 +1,17 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/../../auth";
+import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { calculateOdds } from "@/lib/odds";
 
 export async function GET(
   request: Request,
-  { params }: { params: { groupId: string; questionId: string } }
+  { params }: { params: Promise<{ groupId: string; questionId: string }> }
 ) {
   const session = await auth();
   if (!session?.user?.id)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { groupId, questionId } = params;
+  const { groupId, questionId } = await params;
 
   const membership = await prisma.membership.findUnique({
     where: {
@@ -51,13 +51,13 @@ export async function GET(
 
 export async function POST(
   request: Request,
-  { params }: { params: { groupId: string; questionId: string } }
+  { params }: { params: Promise<{ groupId: string; questionId: string }> }
 ) {
   const session = await auth();
   if (!session?.user?.id)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { groupId, questionId } = params;
+  const { groupId, questionId } = await params;
 
   const membership = await prisma.membership.findUnique({
     where: {
@@ -197,13 +197,13 @@ export async function POST(
 // Remove bet (refund)
 export async function DELETE(
   request: Request,
-  { params }: { params: { groupId: string; questionId: string } }
+  { params }: { params: Promise<{ groupId: string; questionId: string }> }
 ) {
   const session = await auth();
   if (!session?.user?.id)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { groupId, questionId } = params;
+  const { groupId, questionId } = await params;
 
   const membership = await prisma.membership.findUnique({
     where: {
@@ -298,13 +298,13 @@ export async function DELETE(
 // Change bet (move to a different option)
 export async function PUT(
   request: Request,
-  { params }: { params: { groupId: string; questionId: string } }
+  { params }: { params: Promise<{ groupId: string; questionId: string }> }
 ) {
   const session = await auth();
   if (!session?.user?.id)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { groupId, questionId } = params;
+  const { groupId, questionId } = await params;
 
   const membership = await prisma.membership.findUnique({
     where: {

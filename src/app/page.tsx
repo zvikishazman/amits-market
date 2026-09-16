@@ -68,7 +68,18 @@ function LiveOddsBar({ label, percentage, color, delay }: { label: string; perce
   );
 }
 
-function FloatingParticle({ delay, size, x, y }: { delay: number; size: number; x: number; y: number }) {
+const PARTICLES = [
+  { delay: 0, size: 4, x: 9, y: 18, duration: 7 },
+  { delay: 0.8, size: 6, x: 22, y: 71, duration: 9 },
+  { delay: 1.6, size: 3, x: 35, y: 38, duration: 8 },
+  { delay: 2.4, size: 5, x: 48, y: 86, duration: 10 },
+  { delay: 3.2, size: 4, x: 61, y: 24, duration: 6 },
+  { delay: 4, size: 7, x: 73, y: 64, duration: 9 },
+  { delay: 4.8, size: 3, x: 84, y: 42, duration: 7 },
+  { delay: 5.6, size: 5, x: 94, y: 79, duration: 8 },
+] as const;
+
+function FloatingParticle({ delay, size, x, y, duration }: { delay: number; size: number; x: number; y: number; duration: number }) {
   return (
     <div
       className="absolute rounded-full bg-blue-500/20 animate-float-particle"
@@ -78,7 +89,7 @@ function FloatingParticle({ delay, size, x, y }: { delay: number; size: number; 
         left: `${x}%`,
         top: `${y}%`,
         animationDelay: `${delay}s`,
-        animationDuration: `${6 + Math.random() * 4}s`,
+        animationDuration: `${duration}s`,
       }}
     />
   );
@@ -112,8 +123,8 @@ export default function LandingPage() {
         <div className="absolute bottom-0 right-1/4 w-[400px] sm:w-[600px] h-[400px] sm:h-[600px] bg-cyan-500/6 rounded-full blur-[80px] sm:blur-[120px] animate-float" style={{ animationDelay: "3s" }} />
         <div className="absolute top-1/3 right-1/3 w-[250px] sm:w-[400px] h-[250px] sm:h-[400px] bg-purple-500/5 rounded-full blur-[60px] sm:blur-[100px] animate-float" style={{ animationDelay: "5s" }} />
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:40px_40px] sm:bg-[size:60px_60px]" />
-        {[...Array(8)].map((_, i) => (
-          <FloatingParticle key={i} delay={i * 0.8} size={3 + Math.random() * 4} x={Math.random() * 100} y={Math.random() * 100} />
+        {PARTICLES.map((particle) => (
+          <FloatingParticle key={`${particle.x}-${particle.y}`} {...particle} />
         ))}
       </div>
 

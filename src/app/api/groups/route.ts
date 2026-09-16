@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/../../auth";
+import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { generateInviteCode } from "@/lib/invite";
 import { DEFAULT_STARTING_BALANCE, MIN_STARTING_BALANCE, MAX_STARTING_BALANCE } from "@/lib/constants";

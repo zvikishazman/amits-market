@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { CURRENCY_SYMBOL } from "@/lib/constants";
 import { useI18n } from "@/lib/i18n/context";
 
@@ -16,6 +17,7 @@ interface GroupSummary {
 
 export default function DashboardPage() {
   const { data: session } = useSession();
+  const router = useRouter();
   const { t } = useI18n();
   const [groups, setGroups] = useState<GroupSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -125,7 +127,7 @@ export default function DashboardPage() {
           <button
             onClick={() => {
               const code = prompt(t("enterInviteCode"));
-              if (code) window.location.href = `/join/${code}`;
+              if (code) router.push(`/join/${code}`);
             }}
             className="btn-secondary text-sm !py-2"
           >

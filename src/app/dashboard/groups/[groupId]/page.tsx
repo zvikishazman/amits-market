@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import Image from "next/image";
 import { formatCurrency, timeAgo } from "@/lib/utils";
 import { CURRENCY_SYMBOL } from "@/lib/constants";
 import { useI18n } from "@/lib/i18n/context";
@@ -131,6 +132,7 @@ function QuestionCountdown({ closesAt, t }: { closesAt: string; t: (key: Transla
 
 export default function GroupDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const groupId = params.groupId as string;
   const { data: session } = useSession();
   const { t } = useI18n();
@@ -146,6 +148,14 @@ export default function GroupDetailPage() {
   const [settleMsg, setSettleMsg] = useState("");
   const [removingMember, setRemovingMember] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [now, setNow] = useState(0);
+
+  useEffect(() => {
+    const tick = () => setNow(Date.now());
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const fetchGroup = useCallback(() => {
     fetch(`/api/groups/${groupId}`)
@@ -266,7 +276,7 @@ export default function GroupDetailPage() {
         const data = await res.json();
         alert(data.error || t("failedToDeleteGroup"));
       } else {
-        window.location.href = "/dashboard";
+        router.push("/dashboard");
       }
     } catch {
       alert(t("failedToDeleteGroup"));
@@ -303,7 +313,6 @@ export default function GroupDetailPage() {
     );
   }
 
-  const now = Date.now();
   const openQuestions = group.questions.filter((q) => q.status === "OPEN" && (!q.closesAt || new Date(q.closesAt).getTime() > now));
   const pendingQuestions = group.questions.filter((q) => q.status === "OPEN" && q.closesAt && new Date(q.closesAt).getTime() <= now);
   const resolvedQuestions = group.questions.filter((q) => q.status === "RESOLVED");
@@ -390,7 +399,7 @@ export default function GroupDetailPage() {
                 const totalBets = q.options.reduce((s, o) => s + o.bets.reduce((a, b) => a + b.amount, 0), 0);
                 const totalBettors = q.options.reduce((s, o) => s + o._count.bets, 0);
                 const myBet = q.options.find((o) => o.bets.some((b) => b.userId === session?.user?.id));
-                const isClosed = q.closesAt ? new Date(q.closesAt).getTime() <= Date.now() : false;
+                const isClosed = q.closesAt ? new Date(q.closesAt).getTime() <= now : false;
 
                 return (
                   <Link key={q.id} href={`/dashboard/groups/${groupId}/questions/${q.id}`} className="glass-hover p-4 sm:p-5 block group/card relative overflow-hidden">
@@ -657,7 +666,7 @@ export default function GroupDetailPage() {
                     <span className="text-xs sm:text-sm font-mono text-gray-500 w-5 sm:w-6">#{i + 1}</span>
                     <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-xs sm:text-sm font-bold flex-shrink-0 overflow-hidden">
                       {member.user.image ? (
-                        <img src={member.user.image} alt="" className="w-full h-full object-cover" />
+                        <Image src={member.user.image} alt="" width={36} height={36} className="w-full h-full object-cover" />
                       ) : (
                         member.user.name?.[0] || "?"
                       )}

@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import Image from "next/image";
 import { formatCurrency, formatPercentage, timeAgo } from "@/lib/utils";
 import { CURRENCY_SYMBOL } from "@/lib/constants";
 import { calculatePotentialPayout } from "@/lib/odds";
@@ -998,7 +999,7 @@ export default function QuestionDetailPage() {
                           </div>
                           <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-[10px] font-bold flex-shrink-0 overflow-hidden">
                             {member.user.image ? (
-                              <img src={member.user.image} alt="" className="w-full h-full object-cover" />
+                              <Image src={member.user.image} alt="" width={24} height={24} className="w-full h-full object-cover" />
                             ) : (
                               member.user.name?.[0] || "?"
                             )}

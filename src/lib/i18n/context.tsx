@@ -26,8 +26,11 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setLocaleState(detectLocale());
-    setMounted(true);
+    const frame = requestAnimationFrame(() => {
+      setLocaleState(detectLocale());
+      setMounted(true);
+    });
+    return () => cancelAnimationFrame(frame);
   }, []);
 
   useEffect(() => {

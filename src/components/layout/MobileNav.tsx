@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Sidebar from "./Sidebar";
+import { useI18n } from "@/lib/i18n/context";
 
 interface MobileNavProps {
   isOpen: boolean;
@@ -9,16 +10,8 @@ interface MobileNavProps {
 }
 
 export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
-  const [isRtl, setIsRtl] = useState(false);
-
-  useEffect(() => {
-    setIsRtl(document.documentElement.dir === "rtl");
-    const observer = new MutationObserver(() => {
-      setIsRtl(document.documentElement.dir === "rtl");
-    });
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["dir"] });
-    return () => observer.disconnect();
-  }, []);
+  const { dir } = useI18n();
+  const isRtl = dir === "rtl";
 
   // Prevent body scroll when open
   useEffect(() => {

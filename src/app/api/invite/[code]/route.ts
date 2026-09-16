@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { auth } from "@/../../auth";
+import { auth } from "@/auth";
 import { DEFAULT_STARTING_BALANCE } from "@/lib/constants";
 
 export async function GET(
   request: Request,
-  { params }: { params: { code: string } }
+  { params }: { params: Promise<{ code: string }> }
 ) {
-  const { code } = params;
+  const { code } = await params;
 
   const group = await prisma.group.findUnique({
     where: { inviteCode: code },
@@ -39,14 +39,14 @@ export async function GET(
 
 export async function POST(
   request: Request,
-  { params }: { params: { code: string } }
+  { params }: { params: Promise<{ code: string }> }
 ) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { code } = params;
+  const { code } = await params;
 
   const group = await prisma.group.findUnique({
     where: { inviteCode: code },

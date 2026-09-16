@@ -1,17 +1,17 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/../../auth";
+import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { DEFAULT_STARTING_BALANCE } from "@/lib/constants";
 
 export async function POST(
   request: Request,
-  { params }: { params: { groupId: string } }
+  { params }: { params: Promise<{ groupId: string }> }
 ) {
   const session = await auth();
   if (!session?.user?.id)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { groupId } = params;
+  const { groupId } = await params;
   let body;
   try {
     body = await request.json();

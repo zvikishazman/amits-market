@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/../../auth";
+import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(
   request: Request,
-  { params }: { params: { groupId: string } }
+  { params }: { params: Promise<{ groupId: string }> }
 ) {
   const session = await auth();
   if (!session?.user?.id)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { groupId } = params;
+  const { groupId } = await params;
 
   const membership = await prisma.membership.findUnique({
     where: {
@@ -43,13 +43,13 @@ export async function GET(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { groupId: string } }
+  { params }: { params: Promise<{ groupId: string }> }
 ) {
   const session = await auth();
   if (!session?.user?.id)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { groupId } = params;
+  const { groupId } = await params;
 
   const adminMembership = await prisma.membership.findUnique({
     where: {
