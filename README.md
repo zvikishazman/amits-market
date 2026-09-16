@@ -82,3 +82,5 @@ Secrets belong only in local or hosting-provider environment variables. See [SEC
 ## Status
 
 The application is maintained as a portfolio project. Real-money wagering and payment processing are outside its scope; all balances are virtual.
+
+The current edition passes lint, unit tests and the production build. Google sign-in and database-backed workflows require your own OAuth credentials and PostgreSQL instance; they have not been reverified end to end after this modernization. No hosted live application is provided by this repository.
